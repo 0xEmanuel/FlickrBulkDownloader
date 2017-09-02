@@ -12,25 +12,24 @@ Features:
 
 ```
 Usage:
- -c,--crawlall <crawlall=userid>                             Pass an userId as argument to crawl everything
+ -c,--crawlall <crawlall=userid>            Pass an userId as argument to crawl everything
                                             
- -cs,--crawlsingle <crawlsingle=mediaId>           Pass a photoId/videoId as
-                                                                                  argument to crawl this single media
+ -cs,--crawlsingle <crawlsingle=mediaId>    Pass a photoId/videoId as
+                                            argument to crawl this single media
                                             
- -h,--help                                                                   show help
+ -h,--help                                  show help
  
- -lp,--listphotos <listphotos=userid>                   Lists all crawled photos from
-                                                                                   database. If userId specified,
-                                                                                   it will only list entries of that user.
+ -lp,--listphotos <listphotos=userid>       Lists all crawled photos from
+                                            database. If userId specified,
+                                            it will only list entries of that user.
                                             
- -lu,--listusers                                                            Lists all crawled users from database
+ -lu,--listusers                            Lists all crawled users from database
                                             
  -rp,--removephotos <removephotos=userid>   Removes all crawled photos
-                                                                                    from database. If userId
-                                                                                    specified, it will only remove
-                                                                                    entries of that user.
+                                            from database. If userId
+                                            specified, it will only remove
+                                            entries of that user.
                                                                                     
- -ru,--removeusers                                                    Removes all crawled users from
-                                                                                    database
+ -ru,--removeusers                          Removes all crawled users from database
 
 ```
