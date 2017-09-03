@@ -7,16 +7,26 @@ import com.flickr4java.flickr.people.User;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.xml.XmlPage;
 import flickrbulkdownloader.tools.Util;
+import sun.rmi.runtime.Log;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 class FlickrApiHelper
 {
-    static List<PhotoSet> extractPhotoSetList(XmlPage xmlPage)
+
+    private Logger _logger;
+
+    FlickrApiHelper(Logger logger)
+    {
+        _logger = logger;
+    }
+
+    List<PhotoSet> extractPhotoSetList(XmlPage xmlPage)
     {
         List<PhotoSet> photoSetList = new ArrayList<PhotoSet>();
 
@@ -41,7 +51,7 @@ class FlickrApiHelper
         return photoSetList;
     }
 
-    static List<Photo> extractPhotoList(XmlPage xmlPage)
+    List<Photo> extractPhotoList(XmlPage xmlPage)
     {
         List<Photo> photoList = new ArrayList<Photo>();
 
@@ -72,13 +82,13 @@ class FlickrApiHelper
         return photoList;
     }
 
-    static String extractUserId(XmlPage xmlPage)
+    String extractUserId(XmlPage xmlPage)
     {
         DomElement element = xmlPage.getFirstByXPath("//user");
         return element.getAttribute("id");
     }
 
-    static User extractUser(XmlPage xmlPage)
+    User extractUser(XmlPage xmlPage)
     {
         DomElement element = xmlPage.getFirstByXPath("//person");
 
@@ -100,7 +110,7 @@ class FlickrApiHelper
         return user;
     }
 
-    static Photo extractPhoto(XmlPage xmlPage)
+    Photo extractPhoto(XmlPage xmlPage)
     {
         DomElement element = xmlPage.getFirstByXPath("//photo");
 
@@ -130,7 +140,7 @@ class FlickrApiHelper
         return photo;
     }
 
-    static String extractPictureDownloadLink(XmlPage xmlPage)
+    String extractPictureDownloadLink(XmlPage xmlPage)
     {
         DomElement sizeElement = xmlPage.getFirstByXPath("//size[@label='Original' and @media='photo']");
 
@@ -139,8 +149,6 @@ class FlickrApiHelper
         if(sizeElement == null)
         {
             isOriginal = "#0";
-            // TODO: remove statics and need logger for instance
-            //_logger.log(Level.WARNING,"Original quality not available for photoId: " + photo.getId() + ". Need to download the next best quality version (Large).");
             List<DomElement> elementList = xmlPage.getByXPath("//size[@media='photo']");
 
             int maxPixelCount = 0;
@@ -168,18 +176,18 @@ class FlickrApiHelper
         return downloadLink;
     }
 
-    static XmlPage apiCall(List<Parameter> params, String apiMethod) throws IOException
+    XmlPage apiCall(List<Parameter> params, String apiMethod) throws IOException
     {
         String resource = createApiResource(params, apiMethod);
         XmlPage xmlPage = Util.sendHttpWebRequest(resource);
 
-        if(!FlickrApiHelper.apiCallIsValid(xmlPage))
+        if(!apiCallIsValid(xmlPage))
             System.exit(1);
 
         return xmlPage;
     }
 
-    private static boolean apiCallIsValid(XmlPage xmlPage)
+    private boolean apiCallIsValid(XmlPage xmlPage)
     {
         DomElement rspElement = xmlPage.getFirstByXPath("//rsp");
         String stat = rspElement.getAttribute("stat");
@@ -196,7 +204,7 @@ class FlickrApiHelper
         return false;
     }
 
-    private static String createApiResource(List<Parameter> params, String method)
+    private String createApiResource(List<Parameter> params, String method)
     {
         String resource = "https://api.flickr.com/services/rest?method=" + method;
 

@@ -51,6 +51,8 @@ public class FlickrApi
 
     private Logger _logger;
 
+    private FlickrApiHelper _flickrApiHelper;
+
     public FlickrApi(Configuration.AuthConfiguration authConfig, Logger logger) throws IOException, FlickrException
     {
         _apiKey = authConfig.getApiKey();
@@ -59,6 +61,8 @@ public class FlickrApi
 
         _flickr = createAuthenticatedFlickr();
         _logger = logger;
+
+        _flickrApiHelper = new FlickrApiHelper(logger);
     }
 
     private Flickr createAuthenticatedFlickr() throws IOException, FlickrException
@@ -81,9 +85,9 @@ public class FlickrApi
         params.add(new Parameter(USERNAME,username));
         params.add(new Parameter(OAUTH_CONSUMER_KEY,_apiKey));
         params.add(new Parameter(OAUTH_TOKEN, _oauthTokenValue));
-        XmlPage xmlPage = FlickrApiHelper.apiCall(params, "flickr.people.findByUsername");
+        XmlPage xmlPage = _flickrApiHelper.apiCall(params, "flickr.people.findByUsername");
 
-        return FlickrApiHelper.extractUserId(xmlPage);
+        return _flickrApiHelper.extractUserId(xmlPage);
     }
 
     public User queryApiGetUser(String userId) throws IOException
@@ -92,9 +96,9 @@ public class FlickrApi
         params.add(new Parameter(USER_ID,userId));
         params.add(new Parameter(OAUTH_CONSUMER_KEY,_apiKey));
         params.add(new Parameter(OAUTH_TOKEN, _oauthTokenValue));
-        XmlPage xmlPage = FlickrApiHelper.apiCall(params, "flickr.people.getInfo");
+        XmlPage xmlPage = _flickrApiHelper.apiCall(params, "flickr.people.getInfo");
 
-        return FlickrApiHelper.extractUser(xmlPage);
+        return _flickrApiHelper.extractUser(xmlPage);
     }
 
     //this method is not going to be called in the crawling all method
@@ -103,9 +107,9 @@ public class FlickrApi
         List<Parameter> params = new ArrayList<Parameter>();
         params.add(new Parameter(PHOTO_ID,photoId));
         params.add(new Parameter(API_KEY,_apiKey));
-        XmlPage xmlPage = FlickrApiHelper.apiCall(params, "flickr.photos.getInfo");
+        XmlPage xmlPage = _flickrApiHelper.apiCall(params, "flickr.photos.getInfo");
 
-        return FlickrApiHelper.extractPhoto(xmlPage);
+        return _flickrApiHelper.extractPhoto(xmlPage);
     }
 
 
@@ -136,7 +140,7 @@ public class FlickrApi
             params.add(new Parameter(PAGE, page));
             params.add(new Parameter(PER_PAGE, perPage));
             params.add(new Parameter(EXTRAS, "date_upload,date_taken,media,originalsecret"));
-            XmlPage xmlPage = FlickrApiHelper.apiCall(params, apiMethod);
+            XmlPage xmlPage = _flickrApiHelper.apiCall(params, apiMethod);
 
 
             DomElement photosElement = xmlPage.getFirstByXPath(xpathForPageNumber); //
@@ -146,7 +150,7 @@ public class FlickrApi
             //System.out.println("pages: " + pages);
             //System.out.println("totalPhotos: " + totalPhotos);
 
-            List<Photo> photoList = FlickrApiHelper.extractPhotoList(xmlPage);
+            List<Photo> photoList = _flickrApiHelper.extractPhotoList(xmlPage);
             photoListTotal.addAll(photoList);
         }
 
@@ -170,7 +174,7 @@ public class FlickrApi
             params.add(new Parameter(PAGE, page));
             params.add(new Parameter(PER_PAGE, perPage));
 //        params.add(new Parameter(EXTRAS, "date_upload,date_taken,media"));
-            XmlPage xmlPage = FlickrApiHelper.apiCall(params, "flickr.photosets.getList");
+            XmlPage xmlPage = _flickrApiHelper.apiCall(params, "flickr.photosets.getList");
 
             DomElement photoSetsElement = xmlPage.getFirstByXPath("//photosets");
             pages = Integer.parseInt(photoSetsElement.getAttribute("pages"));
@@ -179,7 +183,7 @@ public class FlickrApi
             //System.out.println("pages: " + pages);
             //System.out.println("totalPhotos: " + totalPhotos);
 
-            List<PhotoSet> photoSetList = FlickrApiHelper.extractPhotoSetList(xmlPage);
+            List<PhotoSet> photoSetList = _flickrApiHelper.extractPhotoSetList(xmlPage);
             photoSetListTotal.addAll(photoSetList);
         }
 
@@ -192,9 +196,9 @@ public class FlickrApi
         params.add(new Parameter(FlickrApi.PHOTO_ID,photo.getId() ));
         params.add(new Parameter(FlickrApi.API_KEY,_apiKey ));
         params.add(new Parameter(FlickrApi.SECRET,_apiSecret ));
-        XmlPage xmlPage = FlickrApiHelper.apiCall(params, "flickr.photos.getSizes");
+        XmlPage xmlPage = _flickrApiHelper.apiCall(params, "flickr.photos.getSizes");
 
-        return FlickrApiHelper.extractPictureDownloadLink(xmlPage);
+        return _flickrApiHelper.extractPictureDownloadLink(xmlPage);
     }
 
     public String queryApiGetVideoDownloadLink(Photo photo) throws IOException
@@ -203,7 +207,7 @@ public class FlickrApi
         params.add(new Parameter(FlickrApi.PHOTO_ID,photo.getId() ));
         params.add(new Parameter(FlickrApi.SECRET,photo.getSecret() )); //with this 'normal' secret I can get the original video URL
         params.add(new Parameter(FlickrApi.API_KEY,_apiKey ));
-        XmlPage xmlPage = FlickrApiHelper.apiCall(params, "flickr.video.getStreamInfo");
+        XmlPage xmlPage = _flickrApiHelper.apiCall(params, "flickr.video.getStreamInfo");
 
         DomElement element = xmlPage.getFirstByXPath("//stream[@type='orig']");
         String downloadLink = element.getTextContent();

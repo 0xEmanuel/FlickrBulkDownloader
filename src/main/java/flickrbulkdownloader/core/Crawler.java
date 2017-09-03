@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
@@ -81,7 +82,11 @@ public class Crawler implements ICrawler
                 return false;
 
             if(status == 0)
+            {
                 isOriginal = false;
+                _logger.log(Level.WARNING,"Original quality not available for photoId: " + photo.getId() + ". Need to download the next best quality version (Large).");
+            }
+
             photo.setIsOriginalAvailable(isOriginal);
         }
 
