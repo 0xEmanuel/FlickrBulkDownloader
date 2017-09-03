@@ -10,8 +10,6 @@ import java.util.Properties;
 public class Configuration
 {
 
-    //todo create default config if config.properties not found or values not parsed
-
     public class DatabaseConfiguration
     {
         private String _dbDirPath;
@@ -179,10 +177,14 @@ public class Configuration
 
     public Configuration()
     {
+        File f = new File(configPath);
+        if( !(f.exists() && !f.isDirectory()) )
+            createDefaultProperties();
+
         _properties = new Properties();
         try
         {
-            _properties.load(new FileInputStream(configPath)); //todo if fail, load some default values
+            _properties.load(new FileInputStream(configPath));
         }
         catch (IOException e)
         {
@@ -197,18 +199,38 @@ public class Configuration
         Util.ENABLE_HTTP_OUTPUT = Boolean.parseBoolean(_properties.getProperty("ENABLE_HTTP_OUTPUT"));
     }
 
-//    public void setProperties() throws IOException
-//    {
-//        Properties prop = new Properties();
-//
-//        // set the properties value
-//        prop.setProperty("database", "localhost");
-//        prop.setProperty("dbuser", "mkyong");
-//        prop.setProperty("dbpassword", "password");
-//
-//        // save properties to project root folder
-//        prop.store(new FileOutputStream(configPath), null);
-//    }
+    public void createDefaultProperties()
+    {
+        Properties properties = new Properties();
+
+        // set the properties value
+        properties.setProperty("CRAWL_PICTURES", "true");
+        properties.setProperty("TIMEOUT_SECONDS_POLL_CHECK", "5");
+        properties.setProperty("CRAWL_VIDEOS", "true");
+        properties.setProperty("DB_DIR_PATH", new File("").getAbsoluteFile() + File.separator + "database" + File.separator);
+        properties.setProperty("SAVE_PATH", System.getProperty("user.home") + File.separator + "Downloads" + File.separator + "FlickrBulkDownloads");
+        properties.setProperty("TIMEOUT_SECONDS", "10");
+        properties.setProperty("DB_NAME", "db");
+        properties.setProperty("API_KEY", "");
+        properties.setProperty("API_SECRET", "");
+        properties.setProperty("AUTH_TOKEN", "");
+        properties.setProperty("ENABLE_TIMEOUT_CHECK", "false");
+        properties.setProperty("ENABLE_HTTP_OUTPUT", "true");
+        properties.setProperty("ENABLE_DOWNLOAD_HANDLER", "true");
+        properties.setProperty("ENABLE_DB_INSERTS", "true");
+        properties.setProperty("ENABLE_DB_LOOKUPS", "true");
+
+        // save properties to project root folder
+        try
+        {
+            properties.store(new FileOutputStream(configPath), null);
+        }
+        catch(IOException e)
+        {
+            e.printStackTrace();
+        }
+
+    }
 
 
     private DatabaseConfiguration createDatabaseConfiguration()
