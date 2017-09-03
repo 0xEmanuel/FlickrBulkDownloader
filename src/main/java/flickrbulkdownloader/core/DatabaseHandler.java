@@ -15,9 +15,6 @@ import java.util.logging.Logger;
 public class DatabaseHandler implements IDatabaseHandler
 {
     private final static String DB_PROTOCOL = "jdbc:hsqldb:file:";
-    private static String DB_DIR_PATH;//TODO make path relative
-    private static String DB_NAME;
-
     private static String DB_URL;
 
 
@@ -41,9 +38,7 @@ public class DatabaseHandler implements IDatabaseHandler
 //        server.setDatabasePath(0, "file:" + DB_DIR_PATH + DB_NAME);
 //        server.start();
 //        server.stop();
-        DB_DIR_PATH = databaseConfig.getDbDirPath();
-        DB_NAME = databaseConfig.getDbName();
-        DB_URL = DB_PROTOCOL + DB_DIR_PATH + DB_NAME;
+        DB_URL = DB_PROTOCOL + databaseConfig.getDbDirPath() + databaseConfig.getDbName();
 
         _logger = logger;
         _dbConnection = createDbConnection();
@@ -56,7 +51,7 @@ public class DatabaseHandler implements IDatabaseHandler
         try
         {
             Class.forName("org.hsqldb.jdbcDriver");
-            connection = DriverManager.getConnection(DB_URL, "SA", ""); // jdbc:hsqldb:file:/home/user/IdeaProjects/FlickrUrlExtractor/db
+            connection = DriverManager.getConnection(DB_URL, "SA", "");
         }
         catch (Exception e)
         {

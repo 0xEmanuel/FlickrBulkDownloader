@@ -173,4 +173,32 @@ public class Util
         return sql;
     }
 
+
+    public static boolean IsUserId(String userId)
+    {
+        int seperatorIndex = userId.indexOf("@N");
+        if(-1 != seperatorIndex)
+        {
+            String firstIntAsString= userId.substring(0,seperatorIndex);
+            String secondIntAsString = userId.substring(seperatorIndex+2, userId.length()); //+2 because want to skip the N too
+
+            try
+            {
+                int firstInt = Integer.parseInt(firstIntAsString);
+                int secondInt = Integer.parseInt(secondIntAsString);
+
+                //if exception here
+                return true; //is valid userId
+            }
+            catch (NumberFormatException e)
+            {
+                return false; //is not valid userId
+            }
+
+        }
+
+        return false; //is not valid userId
+    }
+
+
 }

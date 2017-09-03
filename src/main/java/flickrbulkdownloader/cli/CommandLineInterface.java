@@ -44,11 +44,11 @@ public class CommandLineInterface
     {
         options.addOption("h", "help", false, "show help.");
 
-        OptionBuilder.withArgName("crawlall=userid");
+        OptionBuilder.withArgName("crawlall=userId/username");
         OptionBuilder.withLongOpt("crawlall");
         OptionBuilder.hasArg(true);
         OptionBuilder.withValueSeparator();
-        OptionBuilder.withDescription("Pass an userId as argument to crawl everything");
+        OptionBuilder.withDescription("Pass an userId or username as argument to crawl everything");
         options.addOption(OptionBuilder.create(CRAWL_ALL));
 
         OptionBuilder.withArgName("crawlsingle=mediaId");
@@ -99,12 +99,12 @@ public class CommandLineInterface
 
             else if(cmd.hasOption(CRAWL_ALL))
             {
-                String userId = cmd.getOptionValue(CRAWL_ALL);
+                String identification = cmd.getOptionValue(CRAWL_ALL);
 
-                if(!(userId == null) )
-                    _crawler.crawlAllPhotosByUserId(userId);
+                if(!(identification == null) )
+                    _crawler.crawlAllPhotos(identification);
                 else
-                    System.out.println("No <userId> specified!");
+                    System.out.println("No <userId/username> specified!");
 
             }
             else if(cmd.hasOption(CRAWL_SINGLE))

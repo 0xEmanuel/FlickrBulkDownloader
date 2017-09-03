@@ -146,6 +146,7 @@ class FlickrApiHelper
 
         String isOriginal = "#1";
 
+        //if original not available, then get the link at least for the picture version with the highest resolution
         if(sizeElement == null)
         {
             isOriginal = "#0";
@@ -199,7 +200,7 @@ class FlickrApiHelper
         DomElement errElement = xmlPage.getFirstByXPath("//err");
         String code = errElement.getAttribute("code");
         String msg = errElement.getAttribute("msg");
-        System.out.println("ApiCall Error: " + msg + " | code: " + code);
+        _logger.log(Level.SEVERE,"ApiCall Error: " + msg + " | code: " + code);
 
         return false;
     }

@@ -5,6 +5,7 @@ import flickrbulkdownloader.extensions.Photo;
 import flickrbulkdownloader.extensions.PhotoSet;
 import com.flickr4java.flickr.FlickrException;
 import com.flickr4java.flickr.people.User;
+import flickrbulkdownloader.tools.Util;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -113,6 +114,15 @@ public class Crawler implements ICrawler
 
         for(Photo photo : photoList)
             crawlPhoto(photo);
+    }
+
+
+    public void crawlAllPhotos(String identification) throws IOException, SQLException
+    {
+        if(Util.IsUserId(identification))
+            crawlAllPhotosByUserId(identification);
+        else
+            crawlAllPhotosByUsername(identification);
     }
 
     /*

@@ -56,12 +56,14 @@ public class Program
         //getGalleryList(userId,apiKey,"1");
         //getCollectionList(userId,apiKey);
 
-        crawler.crawlAllPhotosByUserId(userId);
-        //crawler.crawlAllPhotosByUsername(username);
-        crawler.crawlPhoto(photoId);
+        crawler.crawlAllPhotos(userId);
+        //crawler.crawlPhoto(photoId);
 
         //List<PhotoSet> photoSetList = crawler.getAllPhotosOrganizedInPhotoSets(userId);
         //Output.OutputPhotoSetList(photoSetList);
 
     }
+
+
+
 }
