@@ -8,7 +8,7 @@ Features:
 - Bulk Downloads: Download all media files of a specified user
 - Download Database: Every downloaded file will have its own database entry. So you will have your own download history, that can be used to avoid to download files that were already crawled.
 - Supports OAuth authentication
-- Unique Feature: Downloads the ORIGINAL files (videos and pictures). This tool uses undocumented API-method with that you can download the original media file. Thus you can backup your whole Flickr Account.
+- Unique Feature: Downloads the ORIGINAL files (videos and pictures). This tool uses undocumented API-method with that you can download the original media file. Thus you can backup your or any other whole Flickr Account.
 
 ```
 Usage:

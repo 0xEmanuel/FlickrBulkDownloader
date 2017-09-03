@@ -7,7 +7,7 @@ import java.io.IOException;
 
 public interface IDownloadHandler
 {
-    boolean downloadMedia(Photo photo) throws IOException;
+    int downloadMedia(Photo photo) throws IOException;
     void setCurrentPhotoSetFolderName(String currentPhotoSetFolderName);
     void setCurrentUserFolderName(String currentUserFolderName);
 }

@@ -72,12 +72,17 @@ public class Crawler implements ICrawler
             if(_databaseHandler.existsPhoto(photo))
                 return false;
 
+        boolean isOriginal = true;
         if(ENABLE_DOWNLOAD_HANDLER)
         {
-            boolean success = _downloaderHandler.downloadMedia(photo);
+            int status = _downloaderHandler.downloadMedia(photo);
 
-            if(!success)
+            if(status == -1) //download failed
                 return false;
+
+            if(status == 0)
+                isOriginal = false;
+            photo.setIsOriginalAvailable(isOriginal);
         }
 
 
@@ -110,7 +115,7 @@ public class Crawler implements ICrawler
         - crawll all photosets
         - update folder names for download path
      */
-    public void crawlAllPhotos(String userId) throws IOException, SQLException
+    public void crawlAllPhotosByUserId(String userId) throws IOException, SQLException
     {
         User user = _flickrApi.queryApiGetUser(userId);
 
@@ -131,6 +136,12 @@ public class Crawler implements ICrawler
             crawlPhotoSet(photoSet);
         }
 
+    }
+
+    public void crawlAllPhotosByUsername(String username) throws IOException, SQLException
+    {
+        String userId = _flickrApi.queryApiGetUserId(username);
+        crawlAllPhotosByUserId(userId);
     }
 
 

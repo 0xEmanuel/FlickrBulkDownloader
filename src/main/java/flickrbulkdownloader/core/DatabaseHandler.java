@@ -23,7 +23,7 @@ public class DatabaseHandler implements IDatabaseHandler
 
     private final static String _createTablePhotos = "CREATE TABLE Photos" +
             " (photo_id bigint, title varchar(255), secret varchar(255)," +
-            " user_id varchar(255),media varchar(255),date_upload varchar(255),date_crawled varchar(255));";
+            " user_id varchar(255),media varchar(255), isOriginal varchar(255), date_upload varchar(255),date_crawled varchar(255));";
 
     private final static String _createTableUsers = "CREATE TABLE Users" +
             " (user_id varchar(255), username varchar(255), realname varchar(255), photosCount int," +
@@ -146,8 +146,8 @@ public class DatabaseHandler implements IDatabaseHandler
 
     public void insertPhoto(Photo photo) throws SQLException
     {
-        String insertPhotoStatement = "INSERT INTO Photos (photo_id, title, secret, user_id, media, date_upload, date_crawled) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?);";
+        String insertPhotoStatement = "INSERT INTO Photos (photo_id, title, secret, user_id, media, isOriginal, date_upload, date_crawled) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
 
         List<Object> args = new ArrayList<Object>();
         args.add(photo.getId());
@@ -155,6 +155,7 @@ public class DatabaseHandler implements IDatabaseHandler
         args.add(photo.getSecret());
         args.add(photo.getUserId());
         args.add(photo.getMedia());
+        args.add(Boolean.toString(photo.getIsOriginalAvailable() ) );
         args.add(photo.getDateAdded().toString());
         args.add(Util.createTimestamp());
         executeStatement(insertPhotoStatement, args, false);
@@ -316,6 +317,7 @@ public class DatabaseHandler implements IDatabaseHandler
             msg += "SECRET: " + resultSet.getString("SECRET") + " | ";
             msg += "USER_ID: " + resultSet.getString("USER_ID") + " | ";
             msg += "MEDIA: " + resultSet.getString("MEDIA") + " | ";
+            msg += "ISORIGINAL: " + resultSet.getString("ISORIGINAL") + " | ";
             msg += "DATE_UPLOAD: " + resultSet.getString("DATE_UPLOAD") + " | ";
             msg += "DATE_CRAWLED: " + resultSet.getString("DATE_CRAWLED") + "\n";
 

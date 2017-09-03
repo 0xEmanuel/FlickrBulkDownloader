@@ -102,7 +102,7 @@ public class CommandLineInterface
                 String userId = cmd.getOptionValue(CRAWL_ALL);
 
                 if(!(userId == null) )
-                    _crawler.crawlAllPhotos(userId);
+                    _crawler.crawlAllPhotosByUserId(userId);
                 else
                     System.out.println("No <userId> specified!");
 

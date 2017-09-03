@@ -121,17 +121,41 @@ public class DownloadHandler implements IDownloadHandler
         3. create destination path (with folders)
         4. via Call: download
      */
-    public boolean downloadMedia(Photo photo) throws IOException
+    public int downloadMedia(Photo photo) throws IOException
     {
-        final String dlink = getDownloadLink(photo);
+        String dlink = getDownloadLink(photo);
+
+        boolean isNotOriginal = false;
+        if(dlink.contains("#"))
+        {
+            if(0 == Integer.parseInt(dlink.substring(dlink.indexOf("#")+1 ) ) )
+                isNotOriginal = true;
+            dlink = dlink.substring(0,dlink.indexOf("#"));
+        }
+
         String filename = createFilename(photo, dlink);
         final String dstPath =  SAVE_PATH + _currentUserFolderName + "/" + _currentPhotoSetFolderName; //are set externally
         final String dstFilePath = dstPath + "/" + filename;
 
         new File(dstPath).mkdirs(); //create folders
 
-        return downloadWithFileChecks(dstFilePath,dlink);
+        boolean isSuccessful = downloadWithFileChecks(dstFilePath,dlink);
+
+        if(!isSuccessful)
+            return -1;
+
+        if(isNotOriginal)
+            return 0;
+
+        return 1; //original
     }
+    /*
+    return values:
+    -1 means download failed
+    0 means download successful but not original quality (large)
+    1 means download successful and original quality
+     */
+
 
     /*
         1. Check if file already exists (finds file via filename and verifies via file size)

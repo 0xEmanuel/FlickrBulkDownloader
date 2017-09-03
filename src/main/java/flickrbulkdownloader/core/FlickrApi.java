@@ -12,6 +12,7 @@ import com.gargoylesoftware.htmlunit.xml.XmlPage;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class FlickrApi
@@ -29,6 +30,7 @@ public class FlickrApi
     private final static String EXTRAS = "extras";
     private final static String PAGE = "page";
     private final static String PER_PAGE = "per_page";
+    private final static String USERNAME = "username";
 
     //possible values for media attribute
     public final static String VIDEO = "video";
@@ -71,6 +73,17 @@ public class FlickrApi
         _tokenKey = authenticator.getTokenKey();
 
         return flickr;
+    }
+
+    public String queryApiGetUserId(String username) throws IOException
+    {
+        List<Parameter> params = new ArrayList<Parameter>();
+        params.add(new Parameter(USERNAME,username));
+        params.add(new Parameter(OAUTH_CONSUMER_KEY,_apiKey));
+        params.add(new Parameter(OAUTH_TOKEN, _oauthTokenValue));
+        XmlPage xmlPage = FlickrApiHelper.apiCall(params, "flickr.people.findByUsername");
+
+        return FlickrApiHelper.extractUserId(xmlPage);
     }
 
     public User queryApiGetUser(String userId) throws IOException
@@ -181,10 +194,7 @@ public class FlickrApi
         params.add(new Parameter(FlickrApi.SECRET,_apiSecret ));
         XmlPage xmlPage = FlickrApiHelper.apiCall(params, "flickr.photos.getSizes");
 
-        DomElement nlist = xmlPage.getFirstByXPath("//size[@label='Original' and @media='photo']");
-        String downloadLink = nlist.getAttribute("source");
-
-        return downloadLink;
+        return FlickrApiHelper.extractPictureDownloadLink(xmlPage);
     }
 
     public String queryApiGetVideoDownloadLink(Photo photo) throws IOException
@@ -195,8 +205,8 @@ public class FlickrApi
         params.add(new Parameter(FlickrApi.API_KEY,_apiKey ));
         XmlPage xmlPage = FlickrApiHelper.apiCall(params, "flickr.video.getStreamInfo");
 
-        DomElement nlist = xmlPage.getFirstByXPath("//stream[@type='orig']");
-        String downloadLink = nlist.getTextContent();
+        DomElement element = xmlPage.getFirstByXPath("//stream[@type='orig']");
+        String downloadLink = element.getTextContent();
 
         return downloadLink;
     }

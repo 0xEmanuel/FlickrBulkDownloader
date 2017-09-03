@@ -65,10 +65,10 @@ public class Util
     public static String appendSlashIfNeeded(String path)
     {
         char lastElement = path.charAt(path.length()-1);
-        if(lastElement == '/')
+        if(lastElement == '/' || lastElement == '\\')
             return path;
 
-        return path + "/";
+        return path + File.separator;
     }
 
     public static boolean isSameFileSize(String localPath, String remotePath) // remotePath can be a download link

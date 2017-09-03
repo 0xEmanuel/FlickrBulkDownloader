@@ -63,16 +63,6 @@ public class Authenticator
     {
         try
         {
-//            String authTokenStorageFilename = "authTokenStorage.txt";
-//
-//            File file = new File(authTokenStorageFilename);
-//            if(!file.exists() && !file.isDirectory())
-//            {
-//                return false; //no token to read
-//            }
-//
-//            _tokenVal = Util.readFile(authTokenStorageFilename);
-
             if(_tokenVal.isEmpty())
                 return false;
 
@@ -99,7 +89,24 @@ public class Authenticator
 
         Scanner scanner = new Scanner(System.in);
 
-        Token token = authInterface.getRequestToken();
+        Token token = null;
+        try
+        {
+            token = authInterface.getRequestToken();
+        }
+        catch(Exception e)
+        {
+            boolean isInvalid = e.getMessage().contains("Invalid Api key");
+            if(isInvalid)
+            {
+                String msg = "The API Key or API Secret in the config.properties is invalid or missing.\n"
+                            + "Create API credentials here: https://www.flickr.com/services/apps/create/apply\n";
+                System.out.print(msg);
+                System.exit(-1);
+            }
+
+        }
+
         System.out.println("token: " + token);
 
         String url = authInterface.getAuthorizationUrl(token, Permission.READ);
@@ -120,8 +127,6 @@ public class Authenticator
         _authConfig.updateAuthToken(_tokenVal);
 
         _secretStr = requestToken.getSecret();
-
-        //Util.writeToFile(_tokenVal,"authTokenStorage.txt");
 
         // This token can be used until the user revokes it.
         System.out.println("Token: " + _tokenVal);

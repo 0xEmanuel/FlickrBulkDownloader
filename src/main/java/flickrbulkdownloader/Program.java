@@ -31,10 +31,10 @@ public class Program
 
         System.out.println("START");
 
-        Logger logger = Logger.getLogger("bla");
+        Logger logger = Logger.getLogger("FlickrBulkDownloader");
         ICrawler crawler = new CrawlerFactory().createCrawler(logger);
 
-        //testMain(crawler);
+        testMain(crawler);
 
         new CommandLineInterface(args, crawler).parse();
 
@@ -45,8 +45,9 @@ public class Program
     {
         String photoSetId = "72157685090055265";
         String userId = "39267545@N06";
+        String username = "ricketdi";
         String photoId = "5107978412";
-        //124841879@N08 //todo some do not allow original download?
+        //124841879@N08
         //56762560@N03
         //39267545@N06
 
@@ -55,7 +56,9 @@ public class Program
         //getGalleryList(userId,apiKey,"1");
         //getCollectionList(userId,apiKey);
 
-        crawler.crawlAllPhotos(userId);
+        //crawler.crawlAllPhotosByUserId(userId);
+        crawler.crawlAllPhotosByUsername(username);
+        crawler.crawlPhoto(photoId);
 
         //List<PhotoSet> photoSetList = crawler.getAllPhotosOrganizedInPhotoSets(userId);
         //Output.OutputPhotoSetList(photoSetList);

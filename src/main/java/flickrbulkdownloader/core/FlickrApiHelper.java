@@ -11,6 +11,7 @@ import flickrbulkdownloader.tools.Util;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 
 
 class FlickrApiHelper
@@ -71,6 +72,12 @@ class FlickrApiHelper
         return photoList;
     }
 
+    static String extractUserId(XmlPage xmlPage)
+    {
+        DomElement element = xmlPage.getFirstByXPath("//user");
+        return element.getAttribute("id");
+    }
+
     static User extractUser(XmlPage xmlPage)
     {
         DomElement element = xmlPage.getFirstByXPath("//person");
@@ -121,6 +128,44 @@ class FlickrApiHelper
         //photo.setOriginalSecret(originalSecret);
 
         return photo;
+    }
+
+    static String extractPictureDownloadLink(XmlPage xmlPage)
+    {
+        DomElement sizeElement = xmlPage.getFirstByXPath("//size[@label='Original' and @media='photo']");
+
+        String isOriginal = "#1";
+
+        if(sizeElement == null)
+        {
+            isOriginal = "#0";
+            // TODO: remove statics and need logger for instance
+            //_logger.log(Level.WARNING,"Original quality not available for photoId: " + photo.getId() + ". Need to download the next best quality version (Large).");
+            List<DomElement> elementList = xmlPage.getByXPath("//size[@media='photo']");
+
+            int maxPixelCount = 0;
+            int maxWidth = 0;
+            int maxHeight = 0;
+
+            for(DomElement element : elementList)
+            {
+                int width = Integer.parseInt(element.getAttribute("width"));
+                int height = Integer.parseInt(element.getAttribute("height"));
+
+                int pixelCount = width * height;
+                if (pixelCount > maxPixelCount)
+                {
+                    maxPixelCount = pixelCount;
+                    maxWidth = width;
+                    maxHeight = height;
+                }
+            }
+            System.out.println("maxWidth: " + maxWidth + " maxHeight: " + maxHeight);
+            sizeElement = xmlPage.getFirstByXPath("//size[@width='"+maxWidth+"' and @height='" + maxHeight + "' and @media='photo']");
+        }
+
+        String downloadLink = sizeElement.getAttribute("source") + isOriginal; //append isOriginal, which is #0 or #1. DownloadHandler wants write an entry in the database for this information
+        return downloadLink;
     }
 
     static XmlPage apiCall(List<Parameter> params, String apiMethod) throws IOException
