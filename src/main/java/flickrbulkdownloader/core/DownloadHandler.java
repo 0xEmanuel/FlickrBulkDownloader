@@ -1,5 +1,6 @@
 package flickrbulkdownloader.core;
 
+import flickrbulkdownloader.extensions.ApiCallInvalidException;
 import flickrbulkdownloader.tools.Util;
 import flickrbulkdownloader.extensions.Photo;
 import org.apache.commons.io.FilenameUtils;
@@ -11,6 +12,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.*;
 import java.security.Security;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
@@ -20,6 +22,7 @@ public class DownloadHandler implements IDownloadHandler
 
     static int TIMEOUT_SECONDS;// = 10;
     static int TIMEOUT_SECONDS_POLL_CHECK;// = 5; //check every 5 seconds for time out.
+    static int MAX_FILENAME_LENGTH = 90;
 
     private BufferedInputStream inputStream = null;
     private FileOutputStream outputStream = null;
@@ -57,7 +60,7 @@ public class DownloadHandler implements IDownloadHandler
     /*
         return Download Link for Media (Picture or Video)
      */
-    private String getDownloadLink(Photo photo) throws IOException
+    private String getDownloadLink(Photo photo) throws IOException, ApiCallInvalidException
     {
         if(photo.getMedia().equalsIgnoreCase(FlickrApi.VIDEO))
             return _flickrApi.queryApiGetVideoDownloadLink(photo);
@@ -102,6 +105,8 @@ public class DownloadHandler implements IDownloadHandler
             filename = filenameFromUrlTuple[0] + "_" + photo.getTitle().trim().replaceAll("[^a-zA-Z0-9-]", "_") + "." + filenameFromUrlTuple[1];
         }
 
+        filename = filename.substring(0, Math.min(MAX_FILENAME_LENGTH, filename.length())); //limit filename length
+
         return filename;
     }
 
@@ -121,7 +126,7 @@ public class DownloadHandler implements IDownloadHandler
         3. create destination path (with folders)
         4. via Call: download
      */
-    public int downloadMedia(Photo photo) throws IOException
+    public int downloadMedia(Photo photo) throws IOException, ApiCallInvalidException
     {
         String dlink = getDownloadLink(photo);
 
@@ -171,7 +176,11 @@ public class DownloadHandler implements IDownloadHandler
 
         boolean isSameSize = Util.getLocalFileSize(localPath) == remoteFileSize; //obviously this matches only if they have also the same filename.
         if(isSameSize) //file already exists and is not corrupted, then I dont need to download the file
+        {
+            _logger.log(Level.INFO, "File " + remotePath + " already exist at " + localPath);
             return true; //we dont consider this as a fail //todo should be logged
+        }
+
 
         int tryCounter;
         for(tryCounter = 0; tryCounter < MAX_DOWNLOAD_RETRIES; tryCounter++)
@@ -263,6 +272,8 @@ public class DownloadHandler implements IDownloadHandler
 
         System.out.println("Download from URL: " + remotePath);
         System.out.println("Save file at: " + localPath);
+
+        //localPath = "/media/sf_VirtualBox_Share/test.mp4";
 
         try
         {

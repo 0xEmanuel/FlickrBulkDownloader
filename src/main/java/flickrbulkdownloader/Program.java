@@ -5,10 +5,12 @@ import com.flickr4java.flickr.FlickrException;
 
 import flickrbulkdownloader.cli.CommandLineInterface;
 import flickrbulkdownloader.core.*;
+import flickrbulkdownloader.extensions.ApiCallInvalidException;
 
 import java.io.*;
 import java.sql.SQLException;
 
+import java.text.ParseException;
 import java.util.logging.Logger;
 
 
@@ -34,23 +36,19 @@ public class Program
         Logger logger = Logger.getLogger("FlickrBulkDownloader");
         ICrawler crawler = new CrawlerFactory().createCrawler(logger);
 
-        testMain(crawler);
+        new Subscription(crawler).crawlSubscribedUsers();
+
+        //testMain(crawler);
 
         new CommandLineInterface(args, crawler).parse();
 
         crawler.close(); //TODO NEVER FORGET THIS TO AVOID DATA LOSS
     }
 
-    public static void testMain(ICrawler crawler) throws IOException, FlickrException, SQLException
-    {
-        String photoSetId = "72157685090055265";
-        String userId = "39267545@N06";
-        String username = "ricketdi";
-        String photoId = "5107978412";
-        //124841879@N08
-        //56762560@N03
-        //39267545@N06
+    public static void testMain(ICrawler crawler) throws IOException, FlickrException, SQLException, ParseException, ApiCallInvalidException {
 
+        String userId = "";
+        
         //getPhotoSetList(userId,apiKey,tokenValue);
         //getPhotoSets(userId,apiKey);
         //getGalleryList(userId,apiKey,"1");
@@ -61,6 +59,9 @@ public class Program
 
         //List<PhotoSet> photoSetList = crawler.getAllPhotosOrganizedInPhotoSets(userId);
         //Output.OutputPhotoSetList(photoSetList);
+
+
+
 
     }
 

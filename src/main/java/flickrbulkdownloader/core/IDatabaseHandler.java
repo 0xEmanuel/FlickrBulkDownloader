@@ -18,5 +18,7 @@ public interface IDatabaseHandler
     void OutputUserEntries() throws SQLException;
     void OutputPhotoEntries() throws SQLException;
     void OutputPhotoEntries(String userId) throws SQLException;
+    void updateUserDateCrawled(User user) throws SQLException;
+    public String getUserDateCrawled(User user) throws SQLException;
 
 }

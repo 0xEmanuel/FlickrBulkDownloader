@@ -1,7 +1,9 @@
 
 package flickrbulkdownloader.core;
 
+import flickrbulkdownloader.extensions.ApiCallInvalidException;
 import flickrbulkdownloader.extensions.Photo;
+import flickrbulkdownloader.extensions.PhotoNotFoundException;
 import flickrbulkdownloader.extensions.PhotoSet;
 import com.flickr4java.flickr.FlickrException;
 import com.flickr4java.flickr.people.User;
@@ -9,7 +11,12 @@ import flickrbulkdownloader.tools.Util;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -23,6 +30,8 @@ public class Crawler implements ICrawler
 
     public static boolean CRAWL_PICTURES;// = false;
     public static boolean CRAWL_VIDEOS;// = true;
+
+    public static boolean CHECK_LAST_CRAWL_DATE = true;
 
     private FlickrApi _flickrApi;
     private IDownloadHandler _downloaderHandler;
@@ -65,7 +74,7 @@ public class Crawler implements ICrawler
         3. If ENABLE_DOWNLOAD_HANDLER is true: download media
         4. If ENABLE_DB_INSERTS is true: insert photoId into database
      */
-    private boolean crawlPhoto(Photo photo) throws IOException, SQLException
+    private boolean crawlPhoto(Photo photo) throws IOException, SQLException, ApiCallInvalidException
     {
         if(!configAllowsCrawl(photo))
             return false;
@@ -98,7 +107,7 @@ public class Crawler implements ICrawler
         return true;
     }
 
-    public boolean crawlPhoto(String photoId) throws IOException, SQLException
+    public boolean crawlPhoto(String photoId) throws IOException, SQLException, ApiCallInvalidException
     {
         return crawlPhoto(_flickrApi.queryApiGetPhoto(photoId));
     }
@@ -108,21 +117,58 @@ public class Crawler implements ICrawler
         - create folder for photoset
         - crawl photoSet
      */
-    private void crawlPhotoSet(PhotoSet photoSet) throws IOException, SQLException
+    private void crawlPhotoSet(PhotoSet photoSet, User user) throws IOException, SQLException, ParseException, ApiCallInvalidException
     {
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        String dateCrawledStr = _databaseHandler.getUserDateCrawled(user);
+
+        Date dateLastTimeCrawled;
+        if(dateCrawledStr == null) //never crawled until the end
+            dateLastTimeCrawled = dateFormat.parse("1900/01/01 00:00:00");
+        else
+            dateLastTimeCrawled = dateFormat.parse(dateCrawledStr);
+        
+        _logger.log(Level.INFO, "The user " + user.getUsername() + " was last time crawled at " + dateFormat.format(dateLastTimeCrawled));
+
         List<Photo> photoList = photoSet.getPhotoList();
+        Collections.sort(photoList); //sort by dateAdded / dateUpload . oldest Photo is now the first element in list
+        Collections.reverse(photoList); //newest Photo is now the first element in list
 
         for(Photo photo : photoList)
-            crawlPhoto(photo);
+        {
+            Date dateUpload = photo.getDateAdded();
+
+            if(dateUpload.before(dateLastTimeCrawled) && CHECK_LAST_CRAWL_DATE)
+            {
+                _logger.log(Level.INFO, "Crawled until photos before " + dateFormat.format(dateLastTimeCrawled));
+                break;
+            }
+
+            try
+            {
+                crawlPhoto(photo);
+            }
+            catch (PhotoNotFoundException e) //just log if photo is not found
+            {
+                _logger.log(Level.WARNING, "Photo with photo.getId() = " + photo.getId() + " not found!");
+            }
+
+        }
+
     }
 
-
-    public void crawlAllPhotos(String identification) throws IOException, SQLException
+    /*
+        - Accepts userId and Username
+        - Checks its syntax and calls the corresponding method
+     */
+    public void crawlAllPhotos(String userIdentification) throws IOException, SQLException, ParseException, ApiCallInvalidException
     {
-        if(Util.IsUserId(identification))
-            crawlAllPhotosByUserId(identification);
+
+        if(Util.IsUserId(userIdentification))
+            crawlAllPhotosByUserId(userIdentification);
         else
-            crawlAllPhotosByUsername(identification);
+            crawlAllPhotosByUsername(userIdentification);
+
     }
 
     /*
@@ -130,8 +176,7 @@ public class Crawler implements ICrawler
         - crawll all photosets
         - update folder names for download path
      */
-    public void crawlAllPhotosByUserId(String userId) throws IOException, SQLException
-    {
+    public void crawlAllPhotosByUserId(String userId) throws IOException, SQLException, ParseException, ApiCallInvalidException {
         User user = _flickrApi.queryApiGetUser(userId);
 
         if(!user.getRealName().equalsIgnoreCase(""))
@@ -148,13 +193,13 @@ public class Crawler implements ICrawler
         for(PhotoSet photoSet : photoSetList)
         {
             _downloaderHandler.setCurrentPhotoSetFolderName(photoSet.getTitle().trim().replaceAll("[^a-zA-Z0-9-]", "_")); //each photoSet should have its own folder
-            crawlPhotoSet(photoSet);
+            crawlPhotoSet(photoSet, user);
         }
 
+        _databaseHandler.updateUserDateCrawled(user); //crawled until the end
     }
 
-    public void crawlAllPhotosByUsername(String username) throws IOException, SQLException
-    {
+    public void crawlAllPhotosByUsername(String username) throws IOException, SQLException, ParseException, ApiCallInvalidException {
         String userId = _flickrApi.queryApiGetUserId(username);
         crawlAllPhotosByUserId(userId);
     }
@@ -163,8 +208,7 @@ public class Crawler implements ICrawler
     /*
         return a list of PhotoSets of specified user, where each PhotoSet contains a photoList
      */
-    private List<PhotoSet> getPhotoSetListsWithPhotoLists(String userId) throws IOException
-    {
+    private List<PhotoSet> getPhotoSetListsWithPhotoLists(String userId) throws IOException, ApiCallInvalidException {
         //source
         List<PhotoSet> photoSetList = _flickrApi.queryApiGetPhotoSetList(userId); //these photoSets contain only IDs
 
@@ -212,8 +256,7 @@ public class Crawler implements ICrawler
         - get unsorted photos in a list and put them in a self-defined photoSet
         - merge all to one list of photoSets and return
      */
-    private List<PhotoSet> getAllPhotosOrganizedInPhotoSets(String userId) throws IOException
-    {
+    private List<PhotoSet> getAllPhotosOrganizedInPhotoSets(String userId) throws IOException, ApiCallInvalidException {
         List<PhotoSet> photoSetList = getPhotoSetListsWithPhotoLists(userId);
 
         List<Photo> totalPhotoList = _flickrApi.queryApiGetPhotos(userId);

@@ -5,6 +5,7 @@ import java.sql.SQLException;
 
 import flickrbulkdownloader.core.ICrawler;
 import flickrbulkdownloader.core.IDatabaseHandler;
+import flickrbulkdownloader.extensions.ApiCallInvalidException;
 import org.apache.commons.cli.*;
 
 public class CommandLineInterface
@@ -165,6 +166,12 @@ public class CommandLineInterface
         }
         catch (IOException e)
         {
+            e.printStackTrace();
+        }
+        catch (java.text.ParseException e)
+        {
+            e.printStackTrace();
+        } catch (ApiCallInvalidException e) {
             e.printStackTrace();
         }
 

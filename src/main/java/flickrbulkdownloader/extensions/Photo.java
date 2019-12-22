@@ -1,12 +1,15 @@
 package flickrbulkdownloader.extensions;
 
 
-public class Photo extends com.flickr4java.flickr.photos.Photo
+import java.util.Date;
+
+public class Photo extends com.flickr4java.flickr.photos.Photo implements Comparable<Photo>
 {
     //private String _originalSecret;
 
     private String _userId; //nsid
     private boolean _isOriginalAvailable;
+
 
 //    public String getOriginalSecret()
 //    {
@@ -36,6 +39,12 @@ public class Photo extends com.flickr4java.flickr.photos.Photo
     public void setIsOriginalAvailable(boolean isOriginalAvailable)
     {
         _isOriginalAvailable = isOriginalAvailable;
+    }
+
+    @Override
+    public int compareTo(Photo photo)
+    {
+        return super.getDateAdded().compareTo(photo.getDateAdded());
     }
 
     //TODO: remove unused getter and setter from parent class

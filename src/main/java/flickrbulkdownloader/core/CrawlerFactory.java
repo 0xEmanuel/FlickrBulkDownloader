@@ -41,11 +41,11 @@ public class CrawlerFactory
 
         //databaseHandler.RemoveUserEntries();
         //databaseHandler.RemovePhotoEntries("");
-        databaseHandler.RemovePhotoEntries();
+        //databaseHandler.RemovePhotoEntries();
 
         //databaseHandler.OutputUserEntries();
         //databaseHandler.OutputPhotoEntries("");
-        databaseHandler.OutputPhotoEntries();
+        //databaseHandler.OutputPhotoEntries();
 
         return crawler;
     }

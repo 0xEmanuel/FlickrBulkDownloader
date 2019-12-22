@@ -1,7 +1,9 @@
 package flickrbulkdownloader.core;
 
 import com.flickr4java.flickr.Parameter;
+import flickrbulkdownloader.extensions.ApiCallInvalidException;
 import flickrbulkdownloader.extensions.Photo;
+import flickrbulkdownloader.extensions.PhotoNotFoundException;
 import flickrbulkdownloader.extensions.PhotoSet;
 import com.flickr4java.flickr.people.User;
 import com.gargoylesoftware.htmlunit.html.DomElement;
@@ -177,32 +179,67 @@ class FlickrApiHelper
         return downloadLink;
     }
 
-    XmlPage apiCall(List<Parameter> params, String apiMethod) throws IOException
+    XmlPage apiCall(List<Parameter> params, String apiMethod) throws IOException, ApiCallInvalidException
     {
         String resource = createApiResource(params, apiMethod);
-        XmlPage xmlPage = Util.sendHttpWebRequest(resource);
+        XmlPage xmlPage = null;
+        int exceptionCounter = 0;
+        int LIMIT = 6;
+        while(exceptionCounter < LIMIT)
+        {
+            try
+            {
+                xmlPage = Util.sendHttpWebRequest(resource);
+                checkApiCallIsValid(xmlPage);
+                break;
+            }
 
-        if(!apiCallIsValid(xmlPage))
-            System.exit(1);
+            catch(com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException e)
+            {
+                exceptionCounter++;
+                try
+                {
+                    Thread.sleep(4000);
+                }
+                catch(InterruptedException ei)
+                {
+                    _logger.log(Level.SEVERE, "Caught exception: \n" + Util.extractStackTrace(ei));
+                }
+
+                _logger.log(Level.WARNING,"Caught exception with exceptionCounter:" + exceptionCounter + ": \n" + Util.extractStackTrace(e));
+            }
+        }
+
+        if(exceptionCounter >= LIMIT)
+            throw new ApiCallInvalidException(0, "Too many exceptions!");
 
         return xmlPage;
     }
 
-    private boolean apiCallIsValid(XmlPage xmlPage)
+    private void checkApiCallIsValid(XmlPage xmlPage) throws ApiCallInvalidException
     {
         DomElement rspElement = xmlPage.getFirstByXPath("//rsp");
         String stat = rspElement.getAttribute("stat");
 
         if(stat.equalsIgnoreCase("ok"))
-            return true;
+            return;
 
         //error case:
         DomElement errElement = xmlPage.getFirstByXPath("//err");
-        String code = errElement.getAttribute("code");
+        int code = Integer.parseInt(errElement.getAttribute("code"));
         String msg = errElement.getAttribute("msg");
-        _logger.log(Level.SEVERE,"ApiCall Error: " + msg + " | code: " + code);
 
-        return false;
+        if(msg.equalsIgnoreCase("Photo not found"))
+        {
+            throw new PhotoNotFoundException(code, msg);
+        } //TODO: Add more error cases and define more Exception
+        else
+        {
+            _logger.log(Level.SEVERE,"ApiCall Error: " + msg + " | code: " + code); // TODO improve logging...
+            throw new ApiCallInvalidException(code, msg);
+        }
+
+
     }
 
     private String createApiResource(List<Parameter> params, String method)

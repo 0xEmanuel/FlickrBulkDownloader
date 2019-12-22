@@ -1,5 +1,6 @@
 package flickrbulkdownloader.core;
 
+import flickrbulkdownloader.extensions.ApiCallInvalidException;
 import flickrbulkdownloader.extensions.Photo;
 import flickrbulkdownloader.extensions.PhotoSet;
 import com.flickr4java.flickr.Flickr;
@@ -79,7 +80,7 @@ public class FlickrApi
         return flickr;
     }
 
-    public String queryApiGetUserId(String username) throws IOException
+    public String queryApiGetUserId(String username) throws IOException, ApiCallInvalidException
     {
         List<Parameter> params = new ArrayList<Parameter>();
         params.add(new Parameter(USERNAME,username));
@@ -90,7 +91,7 @@ public class FlickrApi
         return _flickrApiHelper.extractUserId(xmlPage);
     }
 
-    public User queryApiGetUser(String userId) throws IOException
+    public User queryApiGetUser(String userId) throws IOException, ApiCallInvalidException
     {
         List<Parameter> params = new ArrayList<Parameter>();
         params.add(new Parameter(USER_ID,userId));
@@ -102,7 +103,7 @@ public class FlickrApi
     }
 
     //this method is not going to be called in the crawling all method
-    public Photo queryApiGetPhoto(String photoId) throws IOException
+    public Photo queryApiGetPhoto(String photoId) throws IOException, ApiCallInvalidException
     {
         List<Parameter> params = new ArrayList<Parameter>();
         params.add(new Parameter(PHOTO_ID,photoId));
@@ -113,17 +114,17 @@ public class FlickrApi
     }
 
 
-    public List<Photo> queryApiGetPhotos(String userId) throws IOException
+    public List<Photo> queryApiGetPhotos(String userId) throws IOException, ApiCallInvalidException
     {
         return queryApiGetPhotos(new Parameter(USER_ID,userId), "flickr.people.getPhotos", "//photos");
     }
 
-    public List<Photo> queryApiGetPhotos(PhotoSet photoSet) throws IOException
+    public List<Photo> queryApiGetPhotos(PhotoSet photoSet) throws IOException, ApiCallInvalidException
     {
         return queryApiGetPhotos(new Parameter(PHOTOSET_ID,photoSet.getId()), "flickr.photosets.getPhotos", "//photoset");
     }
 
-    private List<Photo> queryApiGetPhotos(Parameter parameter, String apiMethod, String xpathForPageNumber) throws IOException
+    private List<Photo> queryApiGetPhotos(Parameter parameter, String apiMethod, String xpathForPageNumber) throws IOException, ApiCallInvalidException
     {
         int perPage = 500;
         int pages = 1; //assume at the moment only one page
@@ -157,7 +158,7 @@ public class FlickrApi
         return photoListTotal;
     }
 
-    public List<PhotoSet> queryApiGetPhotoSetList(String userId) throws IOException
+    public List<PhotoSet> queryApiGetPhotoSetList(String userId) throws IOException, ApiCallInvalidException
     {
         int perPage = 500;
         int pages = 1; //assume at the moment only one page
@@ -190,7 +191,7 @@ public class FlickrApi
         return photoSetListTotal;
     }
 
-    public String queryApiGetPictureDownloadLink(Photo photo) throws IOException
+    public String queryApiGetPictureDownloadLink(Photo photo) throws IOException, ApiCallInvalidException
     {
         List<Parameter> params = new ArrayList<Parameter>();
         params.add(new Parameter(FlickrApi.PHOTO_ID,photo.getId() ));
@@ -201,7 +202,7 @@ public class FlickrApi
         return _flickrApiHelper.extractPictureDownloadLink(xmlPage);
     }
 
-    public String queryApiGetVideoDownloadLink(Photo photo) throws IOException
+    public String queryApiGetVideoDownloadLink(Photo photo) throws IOException, ApiCallInvalidException
     {
         List<Parameter> params = new ArrayList<Parameter>();
         params.add(new Parameter(FlickrApi.PHOTO_ID,photo.getId() ));

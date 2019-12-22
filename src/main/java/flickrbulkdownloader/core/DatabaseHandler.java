@@ -51,7 +51,7 @@ public class DatabaseHandler implements IDatabaseHandler
         try
         {
             Class.forName("org.hsqldb.jdbcDriver");
-            connection = DriverManager.getConnection(DB_URL, "SA", "");
+            connection = DriverManager.getConnection(DB_URL, "SA", ""); //UserId: SA, Password: <empty>
         }
         catch (Exception e)
         {
@@ -122,6 +122,8 @@ public class DatabaseHandler implements IDatabaseHandler
                 stmt.setString(i, (String)arg);
             else if (arg instanceof Integer)
                 stmt.setInt(i, (Integer)arg);
+            else if (arg instanceof Boolean)
+                stmt.setBoolean(i, (Boolean)arg);
             else
                 _logger.log(Level.SEVERE, "Unknown argument type for sql query!");
             i++;
@@ -160,15 +162,16 @@ public class DatabaseHandler implements IDatabaseHandler
     private void insertUser(User user) throws SQLException
     {
 
-        String insertUserStatement = "INSERT INTO Users (user_id, username, realname, photosCount, date_crawled) " +
-                "VALUES (?, ?, ?, ?, ?);";
+        String insertUserStatement = "INSERT INTO Users (user_id, username, realname, photosCount) " +
+                "VALUES (?, ?, ?, ?);";
 
         List<Object> args = new ArrayList<Object>();
         args.add(user.getId());
         args.add(user.getUsername().replaceAll("'",""));
         args.add(user.getRealName());
         args.add(user.getPhotosCount());
-        args.add(Util.createTimestamp());
+        //args.add(Util.createTimestamp());
+        //args.add(false);
 
         executeStatement(insertUserStatement, args, false);
     }
@@ -204,6 +207,33 @@ public class DatabaseHandler implements IDatabaseHandler
         {
             e.printStackTrace();
         }
+    }
+
+    public void updateUserDateCrawled(User user) throws SQLException
+    {
+        String updateUserStatement = "UPDATE USERS SET date_crawled = ? WHERE USER_ID = ?;";
+
+        List<Object> args = new ArrayList<Object>();
+        args.add(Util.createTimestamp());
+        args.add(user.getId());
+
+        executeStatement(updateUserStatement, args, false);
+    }
+
+    public String getUserDateCrawled(User user) throws SQLException
+    {
+        String updateUserStatement = "SELECT DATE_CRAWLED FROM USERS WHERE USER_ID = ?";
+
+        List<Object> args = new ArrayList<Object>();
+        args.add(user.getId());
+
+        ResultSet resultSet = executeStatement(updateUserStatement, args, true);
+
+        resultSet.next();
+        String dateCrawled = resultSet.getString("DATE_CRAWLED");
+        resultSet.close();
+
+        return dateCrawled;
     }
 
     private boolean existsEntry(String whatExists, String fromTable, String whatValueExists)
