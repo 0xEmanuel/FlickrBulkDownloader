@@ -1,6 +1,8 @@
 # FlickrBulkDownloader
 
-Status: Still in Development (no release yet)
+With this tool all media can be downloaded (via Flickr API) by multiple given Flickr users (e.g. for backup purposes). The downloads are logged in an internal database (HSQLDB), so the next time the program is run, they will not be repeated. OAuth is supported.
+
+The tool implements a non-documented API method of Flickr that allows to download any media from any user in its original format. In the meantime (2020) the API method has unfortunately been deactivated, so the actual added value of this tool is lost. This was an unique feature back then. Therefore it will not be further developed. It still works, however, for the next best quality formats.
 
 A bulk file downloader / crawler for Flickr.com
 
@@ -8,7 +10,7 @@ Features:
 - Bulk Downloads: Download all media files of a specified user
 - Download Database: Every downloaded file will have its own database entry. So you will have your own download history, that can be used to avoid to download files that were already crawled.
 - Supports OAuth authentication
-- Unique Feature: Downloads the ORIGINAL files (videos and pictures). This tool uses undocumented API-method with that you can download the original media file. Thus you can backup your or any other whole Flickr Account.
+- Feature: Downloads media files in best quality format.
 
 ```
 Usage:
